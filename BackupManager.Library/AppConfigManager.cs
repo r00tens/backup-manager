@@ -26,10 +26,10 @@ namespace BackupManager.Library
             set => SaveSetting("LastBackupInfo", value);
         }
 
-        public void AddScheduledBackup(string sourcePaths, string destinationPath, string schedule)
+        public void AddScheduledBackup(string backupName, string sourcePaths, string destinationPath, string backupType, string schedule)
         {
             string backupKey = "ScheduledBackup" + (ConfigurationManager.AppSettings.Count + 1);
-            string backupValue = $"sourcePaths={sourcePaths};destinationPath={destinationPath};schedule={schedule}";
+            string backupValue = $"backupName={backupName};sourcePaths={sourcePaths};destinationPath={destinationPath};backupType={backupType};schedule={schedule}";
 
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             config.AppSettings.Settings.Add(backupKey, backupValue);
@@ -62,22 +62,23 @@ namespace BackupManager.Library
         private ScheduledBackup ParseBackupInfo(string backupInfo)
         {
             var parts = backupInfo.Split(';');
-            if (parts.Length == 3)
-            {
-                var sourcePaths = parts[0].Split('=')[1];
-                var destinationPath = parts[1].Split('=')[1];
-                var schedule = parts[2].Split('=')[1];
 
-                return new ScheduledBackup
-                {
-                    Name = "Scheduled Backup",
-                    SourcePaths = sourcePaths,
-                    DestinationPath = destinationPath,
-                    Schedule = schedule,
-                    BackupType = "Unknown"
-                };
-            }
-            return null;
+            if (parts.Length != 5) return null;
+            
+            var backupName = parts[0].Split('=')[1];
+            var sourcePaths = parts[1].Split('=')[1];
+            var destinationPath = parts[2].Split('=')[1];
+            var backupType = parts[3].Split('=')[1];
+            var schedule = parts[4].Split('=')[1];
+            
+            return new ScheduledBackup
+            {
+                Name = backupName,
+                SourcePaths = sourcePaths,
+                DestinationPath = destinationPath,
+                BackupType = backupType,
+                Schedule = schedule
+            };
         }
     }
 }

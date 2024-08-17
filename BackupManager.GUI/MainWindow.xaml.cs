@@ -470,13 +470,17 @@ namespace BackupManager.GUI
 
         private void CreateScheduledBackupButton_Click(object sender, RoutedEventArgs e)
         {
+            string backupName = AutomateBackupNameTextBox.Text;
             string sourcePaths = string.Join(",", _automateBackupItems.ToArray());
             string destinationPath = AutomateDestinationPathTextBox.Text;
+            
+            var selectedItem = (ComboBoxItem)AutomateBackupTypeComboBox.SelectedItem;
+            string backupType = selectedItem.Tag.ToString();
 
-            var selectedItem = (ComboBoxItem)AutomateScheduleComboBox.SelectedItem;
+            selectedItem = (ComboBoxItem)AutomateScheduleComboBox.SelectedItem;
             string schedule = selectedItem.Tag.ToString();
 
-            if (string.IsNullOrEmpty(sourcePaths) || string.IsNullOrEmpty(destinationPath) || string.IsNullOrEmpty(schedule))
+            if (string.IsNullOrEmpty(backupName) || string.IsNullOrEmpty(sourcePaths) || string.IsNullOrEmpty(destinationPath) || string.IsNullOrEmpty(schedule))
             {
                 MessageBox.Show("Please fill in all fields for the scheduled backup.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -484,7 +488,7 @@ namespace BackupManager.GUI
 
             try
             {
-                _configManager.AddScheduledBackup(sourcePaths, destinationPath, schedule);
+                _configManager.AddScheduledBackup(backupName, sourcePaths, destinationPath, backupType, schedule);
                 MessageBox.Show("Scheduled backup created successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
