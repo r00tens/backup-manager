@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Media;
 using BackupManager.Library;
 using Button = System.Windows.Controls.Button;
 using DataGrid = System.Windows.Controls.DataGrid;
@@ -353,26 +354,53 @@ namespace BackupManager.GUI
             {
                 row.DetailsVisibility = Visibility.Visible;
                 row.IsSelected = true;
-
-                if (row.Tag is TextBlock iconTextBlock)
-                {
-                    iconTextBlock.Text = "▲";
-                }
+                
+                UpdateRowIcon(row, "▲");
             }
             else
             {
                 row.DetailsVisibility = Visibility.Collapsed;
                 row.IsSelected = false;
-
-                if (row.Tag is TextBlock iconTextBlock)
-                {
-                    iconTextBlock.Text = "▼";
-                }
+                
+                UpdateRowIcon(row, "▼");
             }
 
-            e.Handled = true; // zatrzymaj dalszą propagację zdarzenia
+            // zatrzymaj dalszą propagację zdarzenia
+            e.Handled = true;
         }
-
+        
+        private static void UpdateRowIcon(DataGridRow row, string icon)
+        {
+            var iconTextBlock = FindVisualChildByName<TextBlock>(row, "ExpandIconTextBlock");
+            
+            if (iconTextBlock != null)
+            {
+                iconTextBlock.Text = icon;
+            }
+        }
+        
+        private static T FindVisualChildByName<T>(DependencyObject obj, string name) where T : FrameworkElement
+        {
+            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(obj, i);
+                
+                if (child is T t && t.Name == name)
+                {
+                    return t;
+                }
+                
+                var childOfChild = FindVisualChildByName<T>(child, name);
+                
+                if (childOfChild != null)
+                {
+                    return childOfChild;
+                }
+            }
+            
+            return null;
+        }
+        
         private void RefreshScheduledBackupsButton_Click(object sender, RoutedEventArgs e)
         {
             LoadScheduledBackups();

@@ -138,10 +138,8 @@
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock x:Name="IconTextBlock"
-                                                       Text="▼"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                       Tag="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Tag}"></TextBlock>
+                                            <TextBlock x:Name="ExpandIconTextBlock" Text="▼"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
