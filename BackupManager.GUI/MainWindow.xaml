@@ -64,7 +64,7 @@
                     <StackPanel>
                         <TextBlock Text="Progress:" Margin="5"/>
                         <Grid Margin="5">
-                            <ProgressBar Name="BackupProgressBar" Height="25" VerticalAlignment="Center"/>
+                            <mah:MetroProgressBar Minimum="0" Maximum="100" Name="BackupProgressBar" Height="25" VerticalAlignment="Center"/>
                             <TextBlock Name="BackupProgressPercentageTextBlock" Text="0%" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                     </StackPanel>
@@ -117,7 +117,7 @@
                     <StackPanel>
                         <TextBlock Text="Progress:" Margin="5"/>
                         <Grid Margin="5">
-                            <ProgressBar Name="RestoreProgressBar" Height="25" VerticalAlignment="Center"/>
+                            <mah:MetroProgressBar Minimum="0" Maximum="100" Name="RestoreProgressBar" Height="25" VerticalAlignment="Center"/>
                             <TextBlock Name="RestoreProgressPercentageTextBlock" Text="0%" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                     </StackPanel>

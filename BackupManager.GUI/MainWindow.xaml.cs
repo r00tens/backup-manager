@@ -130,10 +130,9 @@ namespace BackupManager.GUI
                 CreateBackupButton.IsEnabled = true;
                 return;
             }
-
-            BackupProgressBar.Value = 0;
+            
             UpdateBackupProgressBar(0);
-
+            
             string backupName = "backup-" + DateTime.Now.ToString("ddMMyyyy-HHmmss");
             string destinationPath = DestinationPathTextBox.Text;
             string destinationZipPath = Path.Combine(destinationPath, backupName + ".zip");
@@ -161,7 +160,9 @@ namespace BackupManager.GUI
 
                 MessageBox.Show("Backup created successfully.", "Success", MessageBoxButton.OK,
                     MessageBoxImage.Information);
-
+                
+                UpdateBackupProgressBar(0);
+                
                 if (_configManager.GetSetting("AutoVerifyBackupIntegrity") == "true")
                 {
                     bool isValid = _backupService.VerifyBackupIntegrity(compress ? destinationZipPath : destinationFolderPath, compress);
@@ -194,6 +195,7 @@ namespace BackupManager.GUI
                 }
 
                 MessageBox.Show($"Error during backup: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                
                 UpdateBackupProgressBar(0);
             }
             finally
@@ -280,20 +282,21 @@ namespace BackupManager.GUI
                     {
                         try
                         {
-                            RestoreProgressBar.Value = 0;
                             UpdateRestoreProgressBar(0);
-
-
+                            
                             await Task.Run(() =>
                                 _backupService.RestoreBackup(selectedBackup, restorePathDialog.SelectedPath));
 
                             MessageBox.Show("Backup restored successfully.", "Success", MessageBoxButton.OK,
                                 MessageBoxImage.Information);
+                            
+                            UpdateRestoreProgressBar(0);
                         }
                         catch (Exception ex)
                         {
                             MessageBox.Show($"Error during restore: {ex.Message}", "Error", MessageBoxButton.OK,
                                 MessageBoxImage.Error);
+                            
                             UpdateRestoreProgressBar(0);
                         }
                     }
