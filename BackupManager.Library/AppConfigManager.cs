@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Configuration;
+using System.IO;
 
 namespace BackupManager.Library
 {
@@ -16,6 +17,7 @@ namespace BackupManager.Library
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             config.AppSettings.Settings[key].Value = value;
             config.Save(ConfigurationSaveMode.Modified);
+            File.SetLastWriteTime(config.FilePath, DateTime.Now);
 
             ConfigurationManager.RefreshSection("appSettings");
         }
@@ -34,6 +36,7 @@ namespace BackupManager.Library
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             config.AppSettings.Settings.Add(backupKey, backupValue);
             config.Save(ConfigurationSaveMode.Modified);
+            File.SetLastWriteTime(config.FilePath, DateTime.Now);
 
             ConfigurationManager.RefreshSection("appSettings");
         }

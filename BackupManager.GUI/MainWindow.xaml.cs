@@ -357,6 +357,7 @@ namespace BackupManager.GUI
                 var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 config.AppSettings.Settings.Remove(backup.BackupKey);
                 config.Save(ConfigurationSaveMode.Modified);
+                File.SetLastWriteTime(config.FilePath, DateTime.Now);
                 
                 ConfigurationManager.RefreshSection("appSettings");
             }
