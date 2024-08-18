@@ -29,7 +29,7 @@ namespace BackupManager.Library
         public void AddScheduledBackup(string backupName, string sourcePaths, string destinationPath, string backupType, string schedule)
         {
             string backupKey = "ScheduledBackup" + (ConfigurationManager.AppSettings.Count + 1);
-            string backupValue = $"backupName={backupName};sourcePaths={sourcePaths};destinationPath={destinationPath};backupType={backupType};schedule={schedule}";
+            string backupValue = $"backupKey={backupKey};backupName={backupName};sourcePaths={sourcePaths};destinationPath={destinationPath};backupType={backupType};schedule={schedule}";
 
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             config.AppSettings.Settings.Add(backupKey, backupValue);
@@ -63,16 +63,18 @@ namespace BackupManager.Library
         {
             var parts = backupInfo.Split(';');
 
-            if (parts.Length != 5) return null;
+            if (parts.Length != 6) return null;
             
-            var backupName = parts[0].Split('=')[1];
-            var sourcePaths = parts[1].Split('=')[1];
-            var destinationPath = parts[2].Split('=')[1];
-            var backupType = parts[3].Split('=')[1];
-            var schedule = parts[4].Split('=')[1];
+            var backupKey = parts[0].Split('=')[1];
+            var backupName = parts[1].Split('=')[1];
+            var sourcePaths = parts[2].Split('=')[1];
+            var destinationPath = parts[3].Split('=')[1];
+            var backupType = parts[4].Split('=')[1];
+            var schedule = parts[5].Split('=')[1];
             
             return new ScheduledBackup
             {
+                BackupKey = backupKey,
                 Name = backupName,
                 SourcePaths = sourcePaths,
                 DestinationPath = destinationPath,

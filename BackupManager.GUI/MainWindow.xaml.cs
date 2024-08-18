@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -342,63 +343,20 @@ namespace BackupManager.GUI
             ScheduledBackupsDataGrid.ItemsSource = _scheduledBackups;
         }
 
-        private void ScheduledBackupsDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void DeleteScheduleBackupButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!(e.OriginalSource is DependencyObject originalSource)) return;
-            
-            // szukanie wiersza, który został kliknięty
-            if (!(ItemsControl.ContainerFromElement((DataGrid)sender, originalSource) is DataGridRow row)) return;
+            var button = sender as Button;
 
-            // przełączanie widoczności szczegółów wiersza
-            if (row.DetailsVisibility == Visibility.Collapsed)
+            if (button?.DataContext is ScheduledBackup backup)
             {
-                row.DetailsVisibility = Visibility.Visible;
-                row.IsSelected = true;
+                _scheduledBackups.Remove(backup);
                 
-                UpdateRowIcon(row, "▲");
+                var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings.Remove(backup.BackupKey);
+                config.Save(ConfigurationSaveMode.Modified);
+                
+                ConfigurationManager.RefreshSection("appSettings");
             }
-            else
-            {
-                row.DetailsVisibility = Visibility.Collapsed;
-                row.IsSelected = false;
-                
-                UpdateRowIcon(row, "▼");
-            }
-
-            // zatrzymaj dalszą propagację zdarzenia
-            e.Handled = true;
-        }
-        
-        private static void UpdateRowIcon(DataGridRow row, string icon)
-        {
-            var iconTextBlock = FindVisualChildByName<TextBlock>(row, "ExpandIconTextBlock");
-            
-            if (iconTextBlock != null)
-            {
-                iconTextBlock.Text = icon;
-            }
-        }
-        
-        private static T FindVisualChildByName<T>(DependencyObject obj, string name) where T : FrameworkElement
-        {
-            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
-            {
-                var child = VisualTreeHelper.GetChild(obj, i);
-                
-                if (child is T t && t.Name == name)
-                {
-                    return t;
-                }
-                
-                var childOfChild = FindVisualChildByName<T>(child, name);
-                
-                if (childOfChild != null)
-                {
-                    return childOfChild;
-                }
-            }
-            
-            return null;
         }
         
         private void RefreshScheduledBackupsButton_Click(object sender, RoutedEventArgs e)
@@ -489,6 +447,7 @@ namespace BackupManager.GUI
             try
             {
                 _configManager.AddScheduledBackup(backupName, sourcePaths, destinationPath, backupType, schedule);
+                LoadScheduledBackups();
                 MessageBox.Show("Scheduled backup created successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
