@@ -50,11 +50,23 @@ namespace BackupManager.Service
         
         private void InitializeFileSystemWatcher()
         {
-            var configFilePath = $@"C:\Users\{Environment.UserName}\Desktop\my-projects\backup-manager\BackupManager.GUI\bin\Debug\BackupManager.GUI.exe.Config";
-            
+#if DEBUG
+            var directoryInfo = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory);
+
+            for (var i = 0; i < 3 && directoryInfo != null; i++) directoryInfo = directoryInfo.Parent;
+
+            if (directoryInfo == null) throw new InvalidOperationException("Project directory not found.");
+
+            var projectDirectory = directoryInfo.FullName;
+            var configFilePath = Path.Combine(projectDirectory, "BackupManager.GUI", "bin", "Debug", "BackupManager.GUI.exe.config");
             var directory = Path.GetDirectoryName(configFilePath);
             var fileName = Path.GetFileName(configFilePath);
-            
+#elif TRACE
+            var configFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BackupManager", "App.config");
+            var directory = Path.GetDirectoryName(configFilePath);
+            var fileName = Path.GetFileName(configFilePath);
+#endif
+
             if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(fileName))
             {
                 throw new InvalidOperationException("Config file path is invalid.");
