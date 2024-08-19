@@ -44,12 +44,18 @@ namespace BackupManager.Library
         public ObservableCollection<ScheduledBackup> GetScheduledBackups()
         {
             var backups = new ObservableCollection<ScheduledBackup>();
+            var configFilePath = GetConfigFilePath();
+            var configFileMap = new ExeConfigurationFileMap
+            {
+                ExeConfigFilename = configFilePath
+            };
+            var config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
 
-            foreach (string key in ConfigurationManager.AppSettings.AllKeys)
+            foreach (var key in config.AppSettings.Settings.AllKeys)
             {
                 if (key.StartsWith("ScheduledBackup"))
                 {
-                    var value = ConfigurationManager.AppSettings[key];
+                    var value = config.AppSettings.Settings[key].Value;
                     var backupInfo = ParseBackupInfo(value);
 
                     if (backupInfo != null)
@@ -61,7 +67,25 @@ namespace BackupManager.Library
 
             return backups;
         }
+        
+        public static string GetConfigFilePath()
+        {
+#if DEBUG
+            var directoryInfo = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory);
 
+            for (var i = 0; i < 3 && directoryInfo != null; i++) directoryInfo = directoryInfo.Parent;
+
+            if (directoryInfo == null) throw new InvalidOperationException("Project directory not found.");
+
+            var projectDirectory = directoryInfo.FullName;
+            return Path.Combine(projectDirectory, "BackupManager.GUI", "bin", "Debug", "BackupManager.GUI.exe.config");
+#elif TRACE
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BackupManager", "App.config");
+#else
+            throw new InvalidOperationException("Unsupported build configuration.");
+#endif
+        }
+        
         private ScheduledBackup ParseBackupInfo(string backupInfo)
         {
             var parts = backupInfo.Split(';');

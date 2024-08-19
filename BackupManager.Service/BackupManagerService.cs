@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.ServiceProcess;
@@ -12,8 +13,10 @@ namespace BackupManager.Service
         private readonly AppConfigManager _configManager;
         private readonly BackupService _backupService;
         private readonly EventLog _eventLog;
+        private readonly Dictionary<string, Timer> _backupTimers;
         private FileSystemWatcher _configWatcher;
-        private Timer _backupTimer;
+        private Timer _debounceTimer;
+        private const int DebounceInterval = 500;
         
         public BackupManagerService()
         {
@@ -22,19 +25,27 @@ namespace BackupManager.Service
             _configManager = new AppConfigManager();
             _backupService = new BackupService();
             _eventLog = new EventLog();
+            _backupTimers = new Dictionary<string, Timer>();
         }
         
         protected override void OnStart(string[] args)
         {
             InitializeEventLog();
             InitializeFileSystemWatcher();
-            ScheduleNextBackup();
+            ScheduleNextBackups();
         }
         
         protected override void OnStop()
         {
-            _backupTimer?.Stop();
+            foreach (var timer in _backupTimers.Values)
+            {
+                timer?.Stop();
+                timer?.Dispose();
+            }
+            
+            _backupTimers.Clear();
             _configWatcher?.Dispose();
+            _debounceTimer?.Dispose();
         }
         
         private void InitializeEventLog()
@@ -50,23 +61,10 @@ namespace BackupManager.Service
         
         private void InitializeFileSystemWatcher()
         {
-#if DEBUG
-            var directoryInfo = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory);
-
-            for (var i = 0; i < 3 && directoryInfo != null; i++) directoryInfo = directoryInfo.Parent;
-
-            if (directoryInfo == null) throw new InvalidOperationException("Project directory not found.");
-
-            var projectDirectory = directoryInfo.FullName;
-            var configFilePath = Path.Combine(projectDirectory, "BackupManager.GUI", "bin", "Debug", "BackupManager.GUI.exe.config");
+            var configFilePath = AppConfigManager.GetConfigFilePath();
             var directory = Path.GetDirectoryName(configFilePath);
             var fileName = Path.GetFileName(configFilePath);
-#elif TRACE
-            var configFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BackupManager", "App.config");
-            var directory = Path.GetDirectoryName(configFilePath);
-            var fileName = Path.GetFileName(configFilePath);
-#endif
-
+            
             if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(fileName))
             {
                 throw new InvalidOperationException("Config file path is invalid.");
@@ -74,13 +72,7 @@ namespace BackupManager.Service
 
             _configWatcher = new FileSystemWatcher(directory, fileName)
             {
-                NotifyFilter = NotifyFilters.LastWrite 
-                               | NotifyFilters.FileName
-                               | NotifyFilters.LastAccess 
-                               | NotifyFilters.CreationTime
-                               | NotifyFilters.Size
-                               | NotifyFilters.Attributes
-                               | NotifyFilters.Security
+                NotifyFilter = NotifyFilters.LastWrite
             };
             
             _configWatcher.Error += (s, e) =>
@@ -94,23 +86,61 @@ namespace BackupManager.Service
         
         private void OnConfigChanged(object sender, FileSystemEventArgs e)
         {
-            LogBackupEvent($"Config updated. {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-            
-            ScheduleNextBackup();
+            if (_debounceTimer == null)
+            {
+                _debounceTimer = new Timer(DebounceInterval);
+                _debounceTimer.Elapsed += DebounceTimerElapsed;
+                _debounceTimer.AutoReset = false;
+            }
+
+            _debounceTimer.Stop();
+            _debounceTimer.Start();
         }
         
-        private void ScheduleNextBackup()
+        private void DebounceTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            LogBackupEvent($"Config updated.");
+            ScheduleNextBackups();
+        }
+        
+        private void ScheduleNextBackups()
         {
             var scheduledBackups = _configManager.GetScheduledBackups();
-            
+            var activeBackupNames = new HashSet<string>();
+
             foreach (var backup in scheduledBackups)
             {
-                var interval = int.Parse(backup.Schedule) * 60000;
+                activeBackupNames.Add(backup.Name);
                 
-                _backupTimer?.Dispose();
-                _backupTimer = new Timer(interval);
-                _backupTimer.Elapsed += (s, e) => PerformBackup(backup);
-                _backupTimer.Start();
+                if (_backupTimers.TryGetValue(backup.Name, out var backupTimer))
+                {
+                    backupTimer.Interval = int.Parse(backup.Schedule) * 60000;
+                }
+                else
+                {
+                    var interval = int.Parse(backup.Schedule) * 60000;
+                    var timer = new Timer(interval);
+                    timer.Elapsed += (s, e) => PerformBackup(backup);
+                    timer.Start();
+                    _backupTimers.Add(backup.Name, timer);
+                }
+            }
+            
+            var removedBackups = new List<string>();
+            
+            foreach (var backupName in _backupTimers.Keys)
+            {
+                if (!activeBackupNames.Contains(backupName))
+                {
+                    _backupTimers[backupName].Stop();
+                    _backupTimers[backupName].Dispose();
+                    removedBackups.Add(backupName);
+                }
+            }
+            
+            foreach (var backupName in removedBackups)
+            {
+                _backupTimers.Remove(backupName);
             }
         }
         
