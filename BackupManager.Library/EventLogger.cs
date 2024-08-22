@@ -4,25 +4,34 @@ namespace BackupManager.Library
 {
     public class EventLogger
     {
-        private readonly EventLog _eventLog;
-
-        public EventLogger(string source, string log = "Application")
+        private readonly string _eventLogSource;
+        
+        public EventLogger(string eventLogSource)
         {
-            if (!EventLog.SourceExists(source))
+            _eventLogSource = eventLogSource;
+            
+            if (!EventLog.SourceExists(_eventLogSource))
             {
-                EventLog.CreateEventSource(source, log);
+                EventLog.CreateEventSource(_eventLogSource, "Application");
             }
-
-            _eventLog = new EventLog
-            {
-                Source = source,
-                Log = log
-            };
         }
 
-        public void LogEvent(string message, EventLogEntryType type)
+        public void LogEvent(string message, EventLogEntryType entryType = EventLogEntryType.Information)
         {
-            _eventLog.WriteEntry(message, type);
+            using (var eventLog = new EventLog("Application"))
+            {
+                eventLog.Source = _eventLogSource;
+                eventLog.WriteEntry(message, entryType);
+            }
+        }
+        
+        public void LogBackupResult(ScheduledBackup backup, bool success, string errorMessage = null)
+        {
+            string message = success
+                ? $"Backup {backup.Name} completed successfully."
+                : $"Backup {backup.Name} failed: {errorMessage}";
+
+            LogEvent(message, success ? EventLogEntryType.Information : EventLogEntryType.Error);
         }
     }
 }

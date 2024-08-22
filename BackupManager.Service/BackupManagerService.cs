@@ -12,8 +12,8 @@ namespace BackupManager.Service
     {
         private readonly AppConfigManager _configManager;
         private readonly BackupService _backupService;
-        private readonly EventLog _eventLog;
         private readonly Dictionary<string, Timer> _backupTimers;
+        private readonly EventLogger _eventLogger;
         private FileSystemWatcher _configWatcher;
         private Timer _debounceTimer;
         private const int DebounceInterval = 500;
@@ -24,13 +24,12 @@ namespace BackupManager.Service
             
             _configManager = new AppConfigManager();
             _backupService = new BackupService();
-            _eventLog = new EventLog();
+            _eventLogger = new EventLogger("BackupManagerService");
             _backupTimers = new Dictionary<string, Timer>();
         }
         
         protected override void OnStart(string[] args)
         {
-            InitializeEventLog();
             InitializeFileSystemWatcher();
             ScheduleNextBackups();
         }
@@ -46,17 +45,6 @@ namespace BackupManager.Service
             _backupTimers.Clear();
             _configWatcher?.Dispose();
             _debounceTimer?.Dispose();
-        }
-        
-        private void InitializeEventLog()
-        {
-            if (!EventLog.SourceExists("BackupManagerService"))
-            {
-                EventLog.CreateEventSource("BackupManagerService", "Application");
-            }
-            
-            _eventLog.Source = "BackupManagerService";
-            _eventLog.Log = "Application";
         }
         
         private void InitializeFileSystemWatcher()
@@ -77,7 +65,7 @@ namespace BackupManager.Service
             
             _configWatcher.Error += (s, e) =>
             {
-                LogBackupEvent($"FileSystemWatcher error: {e.GetException().Message}", EventLogEntryType.Error);
+                _eventLogger.LogEvent($"FileSystemWatcher error: {e.GetException().Message}", EventLogEntryType.Error);
             };
 
             _configWatcher.Changed += OnConfigChanged;
@@ -99,7 +87,7 @@ namespace BackupManager.Service
         
         private void DebounceTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            LogBackupEvent($"Config updated.");
+            _eventLogger.LogEvent($"Config updated.");
             ScheduleNextBackups();
         }
         
@@ -160,30 +148,12 @@ namespace BackupManager.Service
                     _backupService.CreateBackup(sourcePaths, destinationPath);
                 }
                 
-                LogScheduledBackupResult(backup, true);
+                _eventLogger.LogBackupResult(backup, true);
             }
             catch (Exception ex)
             {
-                LogScheduledBackupResult(backup, false, ex.Message);
+                _eventLogger.LogBackupResult(backup, false, ex.Message);
             }
-        }
-        
-        private static void LogBackupEvent(string message, EventLogEntryType entryType = EventLogEntryType.Information)
-        {
-            using (var eventLog = new EventLog("Application"))
-            {
-                eventLog.Source = "BackupManagerService";
-                eventLog.WriteEntry(message, entryType);
-            }
-        }
-        
-        private static void LogScheduledBackupResult(ScheduledBackup backup, bool success, string errorMessage = null)
-        {
-            string message = success
-                ? $"Backup {backup.Name} completed successfully."
-                : $"Backup {backup.Name} failed: {errorMessage}";
-
-            LogBackupEvent(message, success ? EventLogEntryType.Information : EventLogEntryType.Error);
         }
     }
 }
