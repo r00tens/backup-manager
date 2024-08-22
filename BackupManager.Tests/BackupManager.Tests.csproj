@@ -46,14 +46,29 @@
       <HintPath>..\packages\MSTest.TestFramework.2.2.10\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="LibraryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\BackupManager.GUI\App.config">
+      <Link>App.config</Link>
+    </None>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BackupManager.Library\BackupManager.Library.csproj">
+      <Project>{f8363c61-927d-4d3f-9dae-1b0b6606a813}</Project>
+      <Name>BackupManager.Library</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BackupManager.Service\BackupManager.Service.csproj">
+      <Project>{38e7e376-d5c1-432d-95c4-1f012719a652}</Project>
+      <Name>BackupManager.Service</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
