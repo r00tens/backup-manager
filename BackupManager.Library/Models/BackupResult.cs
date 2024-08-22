@@ -1,12 +1,13 @@
 ﻿using System;
+using BackupManager.Library.Enums;
 
-namespace BackupManager.Library
+namespace BackupManager.Library.Models
 {
     public class BackupResult
     {
         public DateTime BackupDate { get; set; }
         public string BackupName { get; set; }
-        public string BackupType { get; set; } // "Folder" or "ZIP"
+        public BackupType BackupType { get; set; }
         public int TotalFiles { get; set; }
         public int TotalFolders { get; set; }
         public long TotalSize { get; set; }

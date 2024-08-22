@@ -3,6 +3,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
+using BackupManager.Library.Enums;
+using BackupManager.Library.Models;
 
 namespace BackupManager.Library
 {
@@ -19,7 +21,7 @@ namespace BackupManager.Library
             {
                 BackupDate = DateTime.Now,
                 BackupName = Path.GetFileNameWithoutExtension(destinationPath),
-                BackupType = compress ? "ZIP" : "Folder"
+                BackupType = compress ? BackupType.Zip : BackupType.Folder
             };
 
             int totalItems = CountItems(items);

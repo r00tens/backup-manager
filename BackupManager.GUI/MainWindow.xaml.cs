@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using BackupManager.Library;
+using BackupManager.Library.Models;
 using Button = System.Windows.Controls.Button;
 using DataGrid = System.Windows.Controls.DataGrid;
 using MessageBox = System.Windows.MessageBox;
