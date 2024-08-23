@@ -7,7 +7,6 @@
                  xmlns:library="clr-namespace:BackupManager.Library;assembly=BackupManager.Library"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  mc:Ignorable="d"
-                 Icon="Resources/icon.png"
                  Title="BackupManager" Height="900" Width="900"
                  WindowStartupLocation="CenterScreen">
     <Grid>
