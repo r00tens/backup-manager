@@ -128,7 +128,7 @@ namespace BackupManager.Library
             var projectDirectory = directoryInfo.FullName;
             return Path.Combine(projectDirectory, "BackupManager.GUI", "bin", "Debug", "BackupManager.GUI.exe.config");
 #elif TRACE
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BackupManager", "App.config");
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BackupManager", "App.config");
 #else
             throw new InvalidOperationException("Unsupported build configuration.");
 #endif
