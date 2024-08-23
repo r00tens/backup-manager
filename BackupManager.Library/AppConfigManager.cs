@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.IO;
@@ -7,33 +8,80 @@ namespace BackupManager.Library
 {
     public class AppConfigManager
     {
+        private readonly ExeConfigurationFileMap _configurationFileMap;
+
+        public AppConfigManager()
+        {
+            var configFilePath = GetConfigFilePath();
+            
+            _configurationFileMap = new ExeConfigurationFileMap
+            {
+                ExeConfigFilename = configFilePath
+            };
+        }
+
+        public string LastBackupInfo
+        {           
+            get => GetSetting("LastBackupInfo");
+            set => SaveSetting("LastBackupInfo", value);
+        }
+
         public string GetSetting(string key)
         {
-            return ConfigurationManager.AppSettings[key];
+            try
+            {
+                var value = ConfigurationManager.AppSettings[key];
+                if (value != null) return value;
+                
+                var config = ConfigurationManager.OpenMappedExeConfiguration(_configurationFileMap, ConfigurationUserLevel.None);
+                var setting = config.AppSettings.Settings[key];
+
+                if (setting != null) return setting.Value;
+                
+                throw new KeyNotFoundException($"Key '{key}' not found in both appSettings and mapped configuration.");
+            }
+            catch (ConfigurationErrorsException e)
+            {
+                throw new InvalidOperationException("Error accessing configuration.", e);
+            }
         }
 
         public void SaveSetting(string key, string value)
         {
-            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            config.AppSettings.Settings[key].Value = value;
+            try
+            {
+                SaveToConfiguration(ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None), key, value);
+            }
+            catch
+            {
+                SaveToConfiguration(ConfigurationManager.OpenMappedExeConfiguration(_configurationFileMap, ConfigurationUserLevel.None), key, value);
+            }
+        }
+
+        private static void SaveToConfiguration(Configuration config, string key, string value)
+        {
+            if (config.AppSettings.Settings[key] == null)
+            {
+                config.AppSettings.Settings.Add(key, value);
+            }
+            else
+            {
+                config.AppSettings.Settings[key].Value = value;
+            }
+    
             config.Save(ConfigurationSaveMode.Modified);
             File.SetLastWriteTime(config.FilePath, DateTime.Now);
 
             ConfigurationManager.RefreshSection("appSettings");
         }
-
-        public string LastBackupInfo
-        {
-            get => GetSetting("LastBackupInfo");
-            set => SaveSetting("LastBackupInfo", value);
-        }
-
+        
         public void AddScheduledBackup(string backupName, string sourcePaths, string destinationPath, string backupType, string schedule)
         {
-            string backupKey = "ScheduledBackup" + (ConfigurationManager.AppSettings.Count + 1);
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(_configurationFileMap, ConfigurationUserLevel.None);
+
+            string backupKey = "ScheduledBackup" + (config.AppSettings.Settings.Count + 1);
             string backupValue = $"backupKey={backupKey};backupName={backupName};sourcePaths={sourcePaths};destinationPath={destinationPath};backupType={backupType};schedule={schedule}";
 
-            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             config.AppSettings.Settings.Add(backupKey, backupValue);
             config.Save(ConfigurationSaveMode.Modified);
             File.SetLastWriteTime(config.FilePath, DateTime.Now);
@@ -67,7 +115,7 @@ namespace BackupManager.Library
 
             return backups;
         }
-        
+
         public static string GetConfigFilePath()
         {
 #if DEBUG
@@ -80,12 +128,12 @@ namespace BackupManager.Library
             var projectDirectory = directoryInfo.FullName;
             return Path.Combine(projectDirectory, "BackupManager.GUI", "bin", "Debug", "BackupManager.GUI.exe.config");
 #elif TRACE
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BackupManager", "App.config");
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BackupManager", "App.config");
 #else
             throw new InvalidOperationException("Unsupported build configuration.");
 #endif
         }
-        
+
         private ScheduledBackup ParseBackupInfo(string backupInfo)
         {
             var parts = backupInfo.Split(';');
