@@ -116,7 +116,7 @@ namespace BackupManager.Library
             return backups;
         }
 
-        public static string GetConfigFilePath()
+        public static string GetConfigFilePath(bool isTest = false)
         {
 #if DEBUG
             var directoryInfo = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory);
@@ -126,7 +126,10 @@ namespace BackupManager.Library
             if (directoryInfo == null) throw new InvalidOperationException("Project directory not found.");
 
             var projectDirectory = directoryInfo.FullName;
-            return Path.Combine(projectDirectory, "BackupManager.GUI", "bin", "Debug", "BackupManager.GUI.exe.config");
+
+            return isTest
+                ? Path.Combine(projectDirectory, "BackupManager.Tests.dll.config")
+                : Path.Combine(projectDirectory, "BackupManager.GUI", "bin", "Debug", "BackupManager.GUI.exe.config");
 #elif TRACE
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "BackupManager", "App.config");
 #else
