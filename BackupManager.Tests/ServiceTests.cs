@@ -7,18 +7,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BackupManager.Tests
 {
-    /// <summary>
-    /// Klasa zawiera testy jednostkowe dla BackupManagerService, zapewniające poprawne działanie metod prywatnych.
-    /// This class contains unit tests for BackupManagerService, ensuring correct operation of private methods.
-    /// </summary>
     [TestClass]
     public class ServiceTests
     {
         private BackupManagerService _service;
 
         /// <summary>
-        /// Inicjalizuje instancję BackupManagerService przed każdym testem.
-        /// Initializes an instance of BackupManagerService before each test.
+        /// Metoda inicjalizuje instancję BackupManagerService przed każdym testem.
+        ///
+        /// This method initializes the BackupManagerService instance before each test.
         /// </summary>
         [TestInitialize]
         public void Initialize()
@@ -27,8 +24,9 @@ namespace BackupManager.Tests
         }
 
         /// <summary>
-        /// Testuje poprawność ustawienia FileSystemWatcher przez metodę InitializeFileSystemWatcher.
-        /// Tests if the InitializeFileSystemWatcher method correctly sets up the FileSystemWatcher.
+        /// Test sprawdza, czy metoda InitializeFileSystemWatcher prawidłowo konfiguruje obserwatora systemu plików.
+        ///
+        /// This test verifies that the InitializeFileSystemWatcher method correctly sets up the file system watcher.
         /// </summary>
         [TestMethod]
         public void InitializeFileSystemWatcher_ShouldSetupWatcherCorrectly()
@@ -41,15 +39,14 @@ namespace BackupManager.Tests
                 methodInfo.Invoke(_service, new object[] { true });
             }
 
-            // Sprawdza, czy ConfigWatcher nie jest null i czy NotifyFilter jest ustawiony na LastWrite.
-            // Checks if ConfigWatcher is not null and NotifyFilter is set to LastWrite.
             Assert.IsNotNull(_service.ConfigWatcher);
             Assert.AreEqual(NotifyFilters.LastWrite, _service.ConfigWatcher.NotifyFilter);
         }
 
         /// <summary>
-        /// Testuje, czy metoda InitializeFileSystemWatcher rzuca ArgumentException dla nieprawidłowej ścieżki.
-        /// Tests if the InitializeFileSystemWatcher method throws an ArgumentException for an invalid path.
+        /// Test sprawdza, czy metoda InitializeFileSystemWatcher rzuca wyjątek ArgumentException w przypadku nieprawidłowej ścieżki.
+        ///
+        /// This test verifies that the InitializeFileSystemWatcher method throws an ArgumentException when an invalid path is provided.
         /// </summary>
         [TestMethod]
         public void InitializeFileSystemWatcher_ShouldThrowArgumentException_ForInvalidPath()
@@ -68,15 +65,14 @@ namespace BackupManager.Tests
             }
             catch (TargetInvocationException ex)
             {
-                // Sprawdza, czy wyrzucony wyjątek jest typu ArgumentException.
-                // Checks if the thrown exception is of type ArgumentException.
                 Assert.IsInstanceOfType(ex.InnerException, typeof(ArgumentException));
             }
         }
 
         /// <summary>
-        /// Testuje, czy metoda OnConfigChanged inicjuje timer debouncing, jeśli ten jest null.
-        /// Tests if the OnConfigChanged method initializes the debounce timer if it is null.
+        /// Test sprawdza, czy metoda OnConfigChanged inicjalizuje debounceTimer, jeśli nie jest on ustawiony.
+        ///
+        /// This test verifies that the OnConfigChanged method initializes the debounceTimer if it is not set.
         /// </summary>
         [TestMethod]
         public void OnConfigChanged_ShouldInitializeDebounceTimer_IfNull()
@@ -98,15 +94,14 @@ namespace BackupManager.Tests
             // Assert
             var debounceTimer = GetPrivateField<Timer>(_service, "_debounceTimer");
 
-            // Sprawdza, czy timer debouncing jest zainicjowany i uruchomiony.
-            // Checks if the debounce timer is initialized and running.
             Assert.IsNotNull(debounceTimer);
             Assert.IsTrue(debounceTimer.Enabled);
         }
 
         /// <summary>
-        /// Testuje, czy metoda OnConfigChanged restartuje timer debouncing, jeśli ten jest już zainicjowany.
-        /// Tests if the OnConfigChanged method restarts the debounce timer if it is already initialized.
+        /// Test sprawdza, czy metoda OnConfigChanged ponownie uruchamia debounceTimer, jeśli jest on już zainicjalizowany.
+        ///
+        /// This test verifies that the OnConfigChanged method restarts the debounceTimer if it is already initialized.
         /// </summary>
         [TestMethod]
         public void OnConfigChanged_ShouldRestartDebounceTimer_IfAlreadyInitialized()
@@ -130,15 +125,14 @@ namespace BackupManager.Tests
             // Assert
             var updatedDebounceTimer = GetPrivateField<Timer>(_service, "_debounceTimer");
 
-            // Sprawdza, czy ten sam timer został zaktualizowany i jest uruchomiony.
-            // Checks if the same timer is updated and running.
             Assert.AreSame(debounceTimer, updatedDebounceTimer);
             Assert.IsTrue(debounceTimer.Enabled);
         }
 
         /// <summary>
-        /// Metoda pomocnicza do uzyskiwania wartości prywatnego pola.
-        /// Helper method to get the value of a private field.
+        /// Metoda pomocnicza do uzyskiwania wartości prywatnego pola z obiektu.
+        ///
+        /// Helper method to retrieve the value of a private field from an object.
         /// </summary>
         private static T GetPrivateField<T>(object obj, string fieldName)
         {
@@ -153,8 +147,9 @@ namespace BackupManager.Tests
         }
 
         /// <summary>
-        /// Metoda pomocnicza do ustawiania wartości prywatnego pola.
-        /// Helper method to set the value of a private field.
+        /// Metoda pomocnicza do ustawiania wartości prywatnego pola w obiekcie.
+        ///
+        /// Helper method to set the value of a private field in an object.
         /// </summary>
         private static void SetPrivateField(object obj, string fieldName, object value)
         {
