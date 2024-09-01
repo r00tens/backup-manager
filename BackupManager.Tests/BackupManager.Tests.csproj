@@ -74,6 +74,7 @@
     <Compile Include="GuiTests.cs" />
     <Compile Include="LibraryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\BackupManager.GUI\App.config">
