@@ -14,7 +14,7 @@ namespace BackupManager.Service
         private readonly BackupService _backupService;
         private readonly Dictionary<string, Timer> _backupTimers;
         private readonly EventLogger _eventLogger;
-        private FileSystemWatcher _configWatcher;
+        public FileSystemWatcher ConfigWatcher;
         private Timer _debounceTimer;
         private const int DebounceInterval = 500;
         
@@ -41,15 +41,15 @@ namespace BackupManager.Service
                 timer?.Stop();
                 timer?.Dispose();
             }
-            
+
             _backupTimers.Clear();
-            _configWatcher?.Dispose();
+            ConfigWatcher?.Dispose();
             _debounceTimer?.Dispose();
         }
-        
-        private void InitializeFileSystemWatcher()
+
+        private void InitializeFileSystemWatcher(bool isTest = false)
         {
-            var configFilePath = AppConfigManager.GetConfigFilePath();
+            var configFilePath = AppConfigManager.GetConfigFilePath(isTest);
             var directory = Path.GetDirectoryName(configFilePath);
             var fileName = Path.GetFileName(configFilePath);
             
@@ -58,18 +58,18 @@ namespace BackupManager.Service
                 throw new InvalidOperationException("Config file path is invalid.");
             }
 
-            _configWatcher = new FileSystemWatcher(directory, fileName)
+            ConfigWatcher = new FileSystemWatcher(directory, fileName)
             {
                 NotifyFilter = NotifyFilters.LastWrite
             };
             
-            _configWatcher.Error += (s, e) =>
+            ConfigWatcher.Error += (s, e) =>
             {
                 _eventLogger.LogEvent($"FileSystemWatcher error: {e.GetException().Message}", EventLogEntryType.Error);
             };
 
-            _configWatcher.Changed += OnConfigChanged;
-            _configWatcher.EnableRaisingEvents = true;
+            ConfigWatcher.Changed += OnConfigChanged;
+            ConfigWatcher.EnableRaisingEvents = true;
         }
         
         private void OnConfigChanged(object sender, FileSystemEventArgs e)
