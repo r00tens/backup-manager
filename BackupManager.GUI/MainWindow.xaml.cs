@@ -57,12 +57,30 @@ namespace BackupManager.GUI
                 DialogResult result = dialog.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
-                    _backupItems.Add(dialog.SelectedPath);
-                    UpdateBackupItemsControl();
+                    AddPathToBackupItems(dialog.SelectedPath);
                 }
             }
         }
 
+        public void AddPathToBackupItems(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+    
+            if (path.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+            {
+                throw new ArgumentException(@"Path contains invalid characters.", nameof(path));
+            }
+
+            if (!_backupItems.Contains(path))
+            {
+                _backupItems.Add(path);
+                UpdateBackupItemsControl();
+            }
+        }
+        
         private void AddFileButton_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
@@ -545,6 +563,11 @@ namespace BackupManager.GUI
             ApplySettings();
 
             MessageBox.Show("Settings reset to default values.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        
+        public IReadOnlyList<string> GetBackupItems()
+        {
+            return _backupItems.AsReadOnly();
         }
     }
 }
