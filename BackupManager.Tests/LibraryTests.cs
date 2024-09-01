@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using BackupManager.Library;
 using BackupManager.Library.Enums;
 using BackupManager.Library.Models;
@@ -17,8 +15,7 @@ namespace BackupManager.Tests
         private const string TempRestoreFolder = "restoreFolder";
         private const string TempChecksumFilePath = "backup-checksums.txt";
         private const string TempTextFilePath = "test.txt";
-        private const string TempConfigFilePath = "App.config";
-        
+
         [TestMethod]
         public void FormatSize_ShouldReturnCorrectSizeFormat()
         {
@@ -31,7 +28,7 @@ namespace BackupManager.Tests
             // Assert
             Assert.AreEqual("1 MB", formattedSize);
         }
-        
+
         [TestMethod]
         public void CreateBackup_ShouldReturnCorrectBackupType()
         {
@@ -45,7 +42,7 @@ namespace BackupManager.Tests
             // Assert
             Assert.AreEqual(BackupType.Zip, result.BackupType);
         }
-        
+
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void RestoreBackup_ShouldThrowInvalidOperationException_WhenChecksumMismatch()
@@ -53,24 +50,26 @@ namespace BackupManager.Tests
             // Arrange
             var service = new BackupService();
             string[] items = { "test.txt" };
-    
+
             // tworzenie pliku testowego
-            File.WriteAllText("test.txt", "Test content");
-    
+            File.WriteAllText("test.txt", @"Test content");
+
             // tworzenie backup w formacie zip
             service.CreateBackup(items, TempBackupFilePath, true);
 
             // znajdowanie ścieżki do pliku z sumami kontrolnymi
-            var checksumFilePath = Path.Combine(Path.GetDirectoryName(TempBackupFilePath) ?? string.Empty, Path.GetFileNameWithoutExtension(TempBackupFilePath) + "-checksums.txt");
+            var checksumFilePath = Path.Combine(Path.GetDirectoryName(TempBackupFilePath) ?? string.Empty,
+                Path.GetFileNameWithoutExtension(TempBackupFilePath) + "-checksums.txt");
 
             // modyfikacja pliku sum kontrolnych, aby spowodować błąd
             var checksumLines = File.ReadAllLines(checksumFilePath).ToList();
+
             if (checksumLines.Count > 0)
             {
                 // modyfikacja pierwszego wpisu, wprowadzając fałszywą sumę kontrolną
                 checksumLines[0] = "00000000000000000000000000000000 " + checksumLines[0].Split(' ')[1];
             }
-            
+
             File.WriteAllLines(checksumFilePath, checksumLines);
 
             // Act
@@ -82,15 +81,16 @@ namespace BackupManager.Tests
         {
             // Arrange
             var configManager = new AppConfigManager();
-            string originalValue = configManager.GetSetting("DefaultBackupPath");
-            string newValue = "newPath";
-    
+            var originalValue = configManager.GetSetting("DefaultBackupPath");
+            const string newValue = "newPath";
+
             try
             {
                 // Act
                 configManager.SaveSetting("DefaultBackupPath", newValue);
+
                 var after = configManager.GetSetting("DefaultBackupPath");
-        
+
                 // Assert
                 Assert.AreNotEqual(originalValue, after);
                 Assert.AreEqual(newValue, after);
@@ -105,9 +105,9 @@ namespace BackupManager.Tests
         public void Cleanup()
         {
             if (File.Exists(TempBackupFilePath)) File.Delete(TempBackupFilePath);
-            
+
             if (File.Exists(TempChecksumFilePath)) File.Delete(TempChecksumFilePath);
-            
+
             if (File.Exists(TempTextFilePath)) File.Delete(TempTextFilePath);
         }
     }

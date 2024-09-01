@@ -15,7 +15,7 @@ namespace BackupManager.Tests
             // Arrange
             var mainWindow = new MainWindow();
             var initialCount = mainWindow.GetBackupItems().Count;
-            var folderPath = @"C:\test-folder";
+            const string folderPath = @"C:\test-folder";
 
             // Act
             mainWindow.AddPathToBackupItems(folderPath);
@@ -30,9 +30,10 @@ namespace BackupManager.Tests
         {
             // Arrange
             var mainWindow = new MainWindow();
-            var folderPath = @"C:\test-folder";
+            const string folderPath = @"C:\test-folder";
 
             mainWindow.AddPathToBackupItems(folderPath);
+
             var initialCount = mainWindow.GetBackupItems().Count;
 
             // Act
@@ -65,7 +66,7 @@ namespace BackupManager.Tests
         {
             // Arrange
             var mainWindow = new MainWindow();
-            var invalidPath = "C:\\invalid-path<>";
+            const string invalidPath = @"C:\invalid-path<>";
 
             // Act
             mainWindow.AddPathToBackupItems(invalidPath);
