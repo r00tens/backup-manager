@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.IO;
+using BackupManager.Library.Models;
 
 namespace BackupManager.Library
 {

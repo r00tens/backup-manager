@@ -6,6 +6,7 @@
                  xmlns:local="clr-namespace:BackupManager.GUI"
                  xmlns:library="clr-namespace:BackupManager.Library;assembly=BackupManager.Library"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 xmlns:models="clr-namespace:BackupManager.Library.Models;assembly=BackupManager.Library"
                  mc:Ignorable="d"
                  Title="BackupManager" Height="900" Width="900"
                  WindowStartupLocation="CenterScreen">
@@ -128,7 +129,7 @@
                 <StackPanel>
                     <GroupBox Header="Scheduled backups" Margin="5">
                         <StackPanel>
-                            <DataGrid Name="ScheduledBackupsDataGrid" d:DataContext="{d:DesignInstance Type=library:ScheduledBackup, IsDesignTimeCreatable=True}" IsReadOnly="True" CanUserResizeColumns="False" AutoGenerateColumns="False" RowDetailsVisibilityMode="Collapsed" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="143" Margin="5" >
+                            <DataGrid Name="ScheduledBackupsDataGrid" d:DataContext="{d:DesignInstance Type=models:ScheduledBackup, IsDesignTimeCreatable=True}" IsReadOnly="True" CanUserResizeColumns="False" AutoGenerateColumns="False" RowDetailsVisibilityMode="Collapsed" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="143" Margin="5" >
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="Auto">
                                         <DataGridTextColumn.ElementStyle>

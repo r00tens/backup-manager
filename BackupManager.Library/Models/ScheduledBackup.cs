@@ -1,4 +1,4 @@
-﻿namespace BackupManager.Library
+﻿namespace BackupManager.Library.Models
 {
     public class ScheduledBackup
     {

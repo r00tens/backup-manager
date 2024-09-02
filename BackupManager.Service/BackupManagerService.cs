@@ -5,6 +5,7 @@ using System.IO;
 using System.ServiceProcess;
 using System.Timers;
 using BackupManager.Library;
+using BackupManager.Library.Models;
 
 namespace BackupManager.Service
 {
