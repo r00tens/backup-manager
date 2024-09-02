@@ -373,9 +373,16 @@ namespace BackupManager.GUI
             {
                 _scheduledBackups.Remove(backup);
                 
-                var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                var configFilePath = AppConfigManager.GetConfigFilePath();
+                var configFileMap = new ExeConfigurationFileMap
+                {
+                    ExeConfigFilename = configFilePath
+                };
+                var config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+                
                 config.AppSettings.Settings.Remove(backup.BackupKey);
                 config.Save(ConfigurationSaveMode.Modified);
+                
                 File.SetLastWriteTime(config.FilePath, DateTime.Now);
                 
                 ConfigurationManager.RefreshSection("appSettings");
