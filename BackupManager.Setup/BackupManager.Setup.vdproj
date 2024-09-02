@@ -142,19 +142,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_B912C5D8E5A34949345256900D141041"
+        "OwnerKey" = "8:_B5A7134266774E5994B7FE290FCD7F89"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_D4997F5A58EC43ED8E39720FEC2CCEE2"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_B5A7134266774E5994B7FE290FCD7F89"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -197,6 +191,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_FF14AD67168D010B14BD443C9D27A1AE"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_B912C5D8E5A34949345256900D141041"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -685,7 +685,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:BackupManager.Setup"
         "ProductCode" = "8:{A3F918E7-D214-4A95-B0E7-26CDCDA6DA83}"
-        "PackageCode" = "8:{938FFBAD-4A47-47CA-8360-1C3327CF6235}"
+        "PackageCode" = "8:{26C02769-2096-48EF-ACD3-061288A15A8C}"
         "UpgradeCode" = "8:{46E21E15-C818-48A1-AFA1-21C8304C14AD}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
@@ -816,7 +816,7 @@
             "Target" = "8:_B5A7134266774E5994B7FE290FCD7F89"
             "Folder" = "8:_A0E02C4895B043C4A77AC7DD7562CEA2"
             "WorkingFolder" = "8:_2AD28C2D4B0C4D6A8DAED9A47BA3B579"
-            "Icon" = "8:"
+            "Icon" = "8:_8472EA882197477984BD4A1AFE2713A2"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_78F76D268033402A9519E4736E4F19C2"
@@ -830,7 +830,7 @@
             "Target" = "8:_B5A7134266774E5994B7FE290FCD7F89"
             "Folder" = "8:_1D1D3E7948EC4F51A68DD70C3BEA5F50"
             "WorkingFolder" = "8:_2AD28C2D4B0C4D6A8DAED9A47BA3B579"
-            "Icon" = "8:"
+            "Icon" = "8:_8472EA882197477984BD4A1AFE2713A2"
             "Feature" = "8:"
             }
         }
